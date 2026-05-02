@@ -16,6 +16,7 @@
 		A1000007 /* SnapshotPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007 /* SnapshotPreviewView.swift */; };
 		A1000008 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000008 /* Camera.swift */; };
 		A1000009 /* CameraStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009 /* CameraStore.swift */; };
+		A1000015 /* CameraPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000016 /* CameraPreset.swift */; };
 		A1000010 /* CameraDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* CameraDiscoveryService.swift */; };
 		A1000011 /* RTSPStreamManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011 /* RTSPStreamManager.swift */; };
 		A1000012 /* SnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012 /* SnapshotService.swift */; };
@@ -33,6 +34,7 @@
 		A2000007 /* SnapshotPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotPreviewView.swift; sourceTree = "<group>"; };
 		A2000008 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		A2000009 /* CameraStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStore.swift; sourceTree = "<group>"; };
+		A2000016 /* CameraPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreset.swift; sourceTree = "<group>"; };
 		A2000010 /* CameraDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDiscoveryService.swift; sourceTree = "<group>"; };
 		A2000011 /* RTSPStreamManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTSPStreamManager.swift; sourceTree = "<group>"; };
 		A2000012 /* SnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotService.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 			children = (
 				A2000008 /* Camera.swift */,
 				A2000009 /* CameraStore.swift */,
+				A2000016 /* CameraPreset.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -199,6 +202,7 @@
 				A1000007 /* SnapshotPreviewView.swift in Sources */,
 				A1000008 /* Camera.swift in Sources */,
 				A1000009 /* CameraStore.swift in Sources */,
+				A1000015 /* CameraPreset.swift in Sources */,
 				A1000010 /* CameraDiscoveryService.swift in Sources */,
 				A1000011 /* RTSPStreamManager.swift in Sources */,
 				A1000012 /* SnapshotService.swift in Sources */,

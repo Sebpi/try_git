@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_rtsp._tcp</string>
+		<string>_http._tcp</string>
+		<string>_camera._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>WiFi Camera needs local network access to discover and connect to your camera.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is used for displaying the live stream preview.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>WiFi Camera needs access to save snapshots to your photo library.</string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>AccentColor</string>
+	</dict>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsInMedia</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

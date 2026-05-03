@@ -20,6 +20,9 @@
 		A1000010 /* CameraDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* CameraDiscoveryService.swift */; };
 		A1000011 /* RTSPStreamManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011 /* RTSPStreamManager.swift */; };
 		A1000012 /* SnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012 /* SnapshotService.swift */; };
+		A1000016 /* XiaomiCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* XiaomiCloudService.swift */; };
+		A1000017 /* XiaomiLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* XiaomiLoginView.swift */; };
+		A1000018 /* XiaomiDeviceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019 /* XiaomiDeviceListView.swift */; };
 		A1000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000013 /* Assets.xcassets */; };
 		A1000014 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000014 /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -38,6 +41,9 @@
 		A2000010 /* CameraDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDiscoveryService.swift; sourceTree = "<group>"; };
 		A2000011 /* RTSPStreamManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTSPStreamManager.swift; sourceTree = "<group>"; };
 		A2000012 /* SnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotService.swift; sourceTree = "<group>"; };
+		A2000017 /* XiaomiCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XiaomiCloudService.swift; sourceTree = "<group>"; };
+		A2000018 /* XiaomiLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XiaomiLoginView.swift; sourceTree = "<group>"; };
+		A2000019 /* XiaomiDeviceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XiaomiDeviceListView.swift; sourceTree = "<group>"; };
 		A2000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000014 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A2000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -85,6 +91,8 @@
 				A2000005 /* AddCameraView.swift */,
 				A2000006 /* CameraDiscoveryView.swift */,
 				A2000007 /* SnapshotPreviewView.swift */,
+				A2000018 /* XiaomiLoginView.swift */,
+				A2000019 /* XiaomiDeviceListView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -105,6 +113,7 @@
 				A2000010 /* CameraDiscoveryService.swift */,
 				A2000011 /* RTSPStreamManager.swift */,
 				A2000012 /* SnapshotService.swift */,
+				A2000017 /* XiaomiCloudService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -206,6 +215,9 @@
 				A1000010 /* CameraDiscoveryService.swift in Sources */,
 				A1000011 /* RTSPStreamManager.swift in Sources */,
 				A1000012 /* SnapshotService.swift in Sources */,
+				A1000016 /* XiaomiCloudService.swift in Sources */,
+				A1000017 /* XiaomiLoginView.swift in Sources */,
+				A1000018 /* XiaomiDeviceListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

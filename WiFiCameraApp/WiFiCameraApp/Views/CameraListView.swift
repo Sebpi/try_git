@@ -4,6 +4,7 @@ struct CameraListView: View {
     @EnvironmentObject var store: CameraStore
     @State private var showingAddCamera = false
     @State private var showingDiscovery = false
+    @State private var showingXiaomiLogin = false
 
     var body: some View {
         Group {
@@ -30,8 +31,17 @@ struct CameraListView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingAddCamera = true
+                Menu {
+                    Button {
+                        showingAddCamera = true
+                    } label: {
+                        Label("Add Manually", systemImage: "pencil")
+                    }
+                    Button {
+                        showingXiaomiLogin = true
+                    } label: {
+                        Label("Xiaomi Cloud Login", systemImage: "cloud")
+                    }
                 } label: {
                     Image(systemName: "plus")
                 }
@@ -39,6 +49,11 @@ struct CameraListView: View {
         }
         .sheet(isPresented: $showingAddCamera) {
             AddCameraView { camera in
+                store.add(camera)
+            }
+        }
+        .sheet(isPresented: $showingXiaomiLogin) {
+            XiaomiLoginView { camera in
                 store.add(camera)
             }
         }
@@ -70,20 +85,30 @@ struct CameraListView: View {
             Text("Tap + to add a camera manually,\nor use scan to discover cameras on your network.")
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
-            HStack(spacing: 16) {
+            VStack(spacing: 12) {
                 Button {
-                    showingDiscovery = true
+                    showingXiaomiLogin = true
                 } label: {
-                    Label("Scan Network", systemImage: "antenna.radiowaves.left.and.right")
-                }
-                .buttonStyle(.bordered)
-
-                Button {
-                    showingAddCamera = true
-                } label: {
-                    Label("Add Manually", systemImage: "plus")
+                    Label("Xiaomi Cloud Login", systemImage: "cloud")
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
+
+                HStack(spacing: 12) {
+                    Button {
+                        showingDiscovery = true
+                    } label: {
+                        Label("Scan Network", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button {
+                        showingAddCamera = true
+                    } label: {
+                        Label("Add Manually", systemImage: "pencil")
+                    }
+                    .buttonStyle(.bordered)
+                }
             }
         }
         .padding()

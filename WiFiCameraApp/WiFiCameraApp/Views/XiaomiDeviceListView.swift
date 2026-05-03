@@ -55,11 +55,18 @@ struct XiaomiDeviceListView: View {
             }
             .overlay {
                 if devices.isEmpty {
-                    ContentUnavailableView(
-                        "No Cameras Found",
-                        systemImage: "camera.on.rectangle",
-                        description: Text("No camera devices were found on your account.")
-                    )
+                    VStack(spacing: 16) {
+                        Image(systemName: "camera.on.rectangle")
+                            .font(.system(size: 48))
+                            .foregroundColor(.secondary)
+                        Text("No Cameras Found")
+                            .font(.headline)
+                        Text("No camera devices were found on your account.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
                 }
             }
         }

@@ -1,0 +1,70 @@
+diff --git a/frontend/legacy-app.js b/frontend/legacy-app.js
+index 8fe8507..47babb3 100644
+--- a/frontend/legacy-app.js
++++ b/frontend/legacy-app.js
+@@ -1642,7 +1642,7 @@ function openPredictionReasoning(rowKey) {
+   if (!item) return;
+ 
+   const overlay = document.getElementById("pred-reasoning-overlay");
+-  document.getElementById("pred-reasoning-title").textContent = `${item.ticker} thesis`;
++  document.getElementById("pred-reasoning-title").textContent = `${item.ticker} short-term signal`;
+   document.getElementById("pred-reasoning-company").textContent = item.name || item.ticker;
+   document.getElementById("pred-reasoning-meta").innerHTML = `
+     <span>${safe(item.date)}</span>
+diff --git a/frontend/legacy.html b/frontend/legacy.html
+index ba68493..2c17811 100644
+--- a/frontend/legacy.html
++++ b/frontend/legacy.html
+@@ -278,8 +278,8 @@
+     <section id="tab-predictions" class="tab">
+       <div class="pred-header">
+         <div>
+-          <h2>Daily Predictions</h2>
+-          <p class="pred-subtitle">Claude analyses macro trends, news (Yahoo Finance, MarketWatch) and stock fundamentals to predict next-day moves. Learns from past accuracy.</p>
++          <h2>Daily Predictions <span style="font-size:0.6em;font-weight:400;color:var(--color-muted);vertical-align:middle;">Short-term signal</span></h2>
++          <p class="pred-subtitle">Price-momentum and factor-score engine (V/M/Q/G). Driven by recent price movement and quant ratios — not the 9-agent thesis. For long-term fundamental views, use the Thesis tab.</p>
+         </div>
+         <div class="pred-actions">
+           <button id="btn-generate" class="btn-primary">Generate Today's Predictions</button>
+@@ -363,8 +363,8 @@
+       <div class="pred-reasoning-panel">
+         <button id="pred-reasoning-close" class="close-btn">âœ•</button>
+         <div class="pred-reasoning-head">
+-          <div class="pred-reasoning-label">Prediction thesis</div>
+-          <h3 id="pred-reasoning-title">Stock thesis</h3>
++          <div class="pred-reasoning-label">Short-term signal analysis</div>
++          <h3 id="pred-reasoning-title">Short-term signal</h3>
+           <p id="pred-reasoning-company" class="pred-reasoning-company"></p>
+           <div id="pred-reasoning-meta" class="pred-reasoning-meta"></div>
+         </div>
+diff --git a/frontend/react-app.js b/frontend/react-app.js
+index 0d3ba5f..b6e7be5 100644
+--- a/frontend/react-app.js
++++ b/frontend/react-app.js
+@@ -959,7 +959,7 @@
+     const accuracy = useMemo(() => computeAccuracy(filtered), [filtered]);
+ 
+     return h("div", null,
+-      h(SectionHead, { title: "Predictions", kicker: "Daily ranking", subtitle: "Multi-horizon forecasts with factor scores. Claude analyses macro trends, news and fundamentals.", actions: [
++      h(SectionHead, { title: "Predictions", kicker: "Short-term signal", subtitle: "Price-signal and factor-score engine (V/M/Q/G). Driven by recent price momentum and quant ratios — not the 9-agent thesis. For long-term fundamental views, use Agent Thesis.", actions: [
+         h(Button, { key: "refresh", onClick: async () => { await load(); loadLearning(false); }, disabled: busy }, "Refresh actuals"),
+         h(Button, { key: "back", onClick: backfill, disabled: busy, title: "Retry factor scores for today's predictions" }, "Backfill factors"),
+         h(Button, { key: "rebuild", onClick: rebuildCalibration, disabled: busy || rebuilding, title: "Rebuild the adaptive calibration model" }, rebuilding ? "Rebuilding..." : "Rebuild model"),
+@@ -1014,7 +1014,7 @@
+             h("tr", null, h("td", { className: "px-3 py-4 text-pulse-muted", colSpan: 14 }, busy ? "Loading..." : "No predictions for this period.")))
+         )
+       ),
+-      selected ? h(SlideOver, { title: `${selected.ticker} prediction`, kicker: "Prediction thesis", onClose: () => setSelected(null) },
++      selected ? h(SlideOver, { title: `${selected.ticker} prediction`, kicker: "Short-term signal analysis", onClose: () => setSelected(null) },
+         h("div", { className: "grid gap-4" },
+           h("div", { className: "grid grid-cols-2 gap-2 sm:grid-cols-3" },
+             h(Metric, { label: "Score", value: selected.score == null ? "—" : `${selected.score}/100`, tone: scoreTone(selected.score) }),
+@@ -1231,7 +1231,7 @@
+       p.dcf && p.dcf.margin_of_safety_pct != null ? h("div", { className: "mt-3" },
+         h(Metric, { label: "MoS", value: fmtPct(p.dcf.margin_of_safety_pct, 0), tone: p.dcf.margin_of_safety_pct >= 0 ? "text-pulse-green" : "text-pulse-red" })
+       ) : null,
+-      h(Button, { onClick: onOpen, className: "mt-4 w-full" }, "View thesis")
++      h(Button, { onClick: onOpen, className: "mt-4 w-full" }, "View signal detail")
+     );
+   }
+ 

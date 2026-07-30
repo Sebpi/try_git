@@ -2,12 +2,12 @@ name: Quoting App CI/CD
 
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
     paths:
       - "quoting-app/**"
       - ".github/workflows/quoting-app-deploy.yml"
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "quoting-app/**"
       - ".github/workflows/quoting-app-deploy.yml"
@@ -47,7 +47,7 @@ jobs:
 
   deploy:
     name: Deploy to Fly
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: [python-checks]
     runs-on: ubuntu-latest
     concurrency: quoting-app-deploy
@@ -63,7 +63,7 @@ jobs:
 
   smoke:
     name: Post-deploy smoke
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: deploy
     runs-on: ubuntu-latest
     steps:

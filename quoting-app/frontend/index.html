@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quoting App -- Admin Dashboard</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --text: #1a1d23; --muted: #6b7280;
+    --border: #e3e6eb; --accent: #2563eb; --green: #16a34a; --red: #dc2626;
+    --amber: #d97706; --pill-bg: #eef1f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --card: #1d2027; --text: #e7e9ee; --muted: #9aa2b1;
+      --border: #2b2f38; --accent: #5b8def; --green: #34d058; --red: #ef5350;
+      --amber: #f2b13d; --pill-bg: #262a33;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px; border-bottom: 1px solid var(--border); background: var(--card);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  header .token-box { display: flex; gap: 6px; align-items: center; }
+  header input { background: var(--pill-bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 6px 8px; font-size: 12px; width: 180px; }
+  nav { display: flex; gap: 4px; padding: 10px 22px 0; }
+  nav button {
+    background: none; border: none; color: var(--muted); padding: 8px 14px; cursor: pointer;
+    font-size: 13px; border-bottom: 2px solid transparent; font-weight: 500;
+  }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  main { padding: 18px 22px 60px; max-width: 1200px; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; }
+  .tiles { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .tile {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; min-width: 130px; flex: 1;
+  }
+  .tile .n { font-size: 22px; font-weight: 700; }
+  .tile .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 10.5px; letter-spacing: .03em; }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover { background: var(--pill-bg); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    background: var(--pill-bg); color: var(--text); }
+  .pill.green { color: var(--green); }
+  .pill.red { color: var(--red); }
+  .pill.amber { color: var(--amber); }
+  .pill.blue { color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .card h3 { margin: 0 0 10px; font-size: 13px; }
+  .muted { color: var(--muted); }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .col { flex: 1; min-width: 280px; }
+  .timeline-item { border-left: 2px solid var(--border); padding: 4px 0 4px 12px; margin-left: 4px; font-size: 12.5px; }
+  .timeline-item b { color: var(--accent); }
+  textarea { width: 100%; min-height: 130px; background: var(--pill-bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-family: inherit; font-size: 12.5px; }
+  input[type=text], input[type=email] { width: 100%; background: var(--pill-bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 12.5px; }
+  label { font-size: 11px; color: var(--muted); display: block; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: .03em; }
+  button.btn {
+    border: none; border-radius: 6px; padding: 7px 12px; font-size: 12.5px; cursor: pointer; font-weight: 600;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-ghost { background: var(--pill-bg); color: var(--text); }
+  .draft-box { border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; background: var(--pill-bg); }
+  .draft-box .subject { font-weight: 600; margin-bottom: 6px; }
+  .draft-box pre { white-space: pre-wrap; font-family: inherit; font-size: 12.5px; margin: 0 0 10px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .example-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .example-btns button { font-size: 11px; padding: 5px 9px; }
+  #toast { position: fixed; bottom: 18px; right: 18px; background: var(--card); border: 1px solid var(--border);
+    padding: 10px 16px; border-radius: 8px; font-size: 12.5px; display: none; box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+  a.back { color: var(--accent); cursor: pointer; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Quoting App -- Agent Dashboard</h1>
+  <div class="token-box">
+    <input id="adminToken" type="text" placeholder="X-Admin-Token">
+    <button class="btn btn-ghost" onclick="saveToken()">Save</button>
+  </div>
+</header>
+<nav>
+  <button class="active" data-view="overview" onclick="showView('overview')">Overview</button>
+  <button data-view="threads" onclick="showView('threads')">Threads</button>
+  <button data-view="approvals" onclick="showView('approvals')">Approvals</button>
+  <button data-view="simulate" onclick="showView('simulate')">Simulate</button>
+  <button data-view="thread-detail" onclick="showView('thread-detail')" id="detailNavBtn" style="display:none">Thread Detail</button>
+</nav>
+<main>
+
+  <section id="view-overview" class="view active">
+    <div class="tiles" id="metricTiles"></div>
+    <div class="card">
+      <h3>Recent agent activity</h3>
+      <div id="recentDecisions" class="muted">Loading...</div>
+    </div>
+    <div class="card">
+      <h3>AM notifications</h3>
+      <div id="amNotifications" class="muted">Loading...</div>
+    </div>
+  </section>
+
+  <section id="view-threads" class="view">
+    <div class="card">
+      <h3>All threads</h3>
+      <table id="threadsTable">
+        <thead><tr><th>ID</th><th>Customer</th><th>Subject</th><th>Status</th><th>Complexity</th><th>Updated</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="view-approvals" class="view">
+    <div class="card">
+      <h3>Pending approvals</h3>
+      <div id="approvalsList" class="muted">Loading...</div>
+    </div>
+  </section>
+
+  <section id="view-simulate" class="view">
+    <div class="card">
+      <h3>Simulate an inbound email</h3>
+      <p class="muted">Injects a message straight into the Ingestion Agent, exactly like a real inbox webhook would.</p>
+      <div class="example-btns">
+        <button class="btn btn-ghost" onclick="fillExample('simple')">Simple quote example</button>
+        <button class="btn btn-ghost" onclick="fillExample('complex')">Complex quote example</button>
+        <button class="btn btn-ghost" onclick="fillExample('unknown')">Unknown customer example</button>
+      </div>
+      <label>From email</label>
+      <input type="email" id="simFrom" value="jordan.lee@northwind.example">
+      <label>From name</label>
+      <input type="text" id="simName" value="Jordan Lee">
+      <label>Subject</label>
+      <input type="text" id="simSubject" value="Quote request">
+      <label>Body</label>
+      <textarea id="simBody">Hi, could you send a quote for 5 ergonomic office chairs? Thanks, Jordan</textarea>
+      <div style="margin-top:10px" class="btn-row">
+        <button class="btn btn-primary" onclick="submitSimulate()">Send inbound email</button>
+      </div>
+      <div id="simResult" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section id="view-thread-detail" class="view">
+    <a class="back" onclick="showView('threads')">&larr; back to threads</a>
+    <div id="threadDetail"></div>
+  </section>
+
+</main>
+<div id="toast"></div>
+<script src="/static/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+[
+  {"sku": "OFC-CHAIR-ERGO", "name": "Ergonomic Pro Office Chair", "aliases": ["ergo chair", "ergonomic chair", "office chair"], "price": 329.0, "currency": "USD", "category": "furniture"},
+  {"sku": "OFC-DESK-STAND", "name": "Standing Desk 120cm", "aliases": ["standing desk", "sit-stand desk", "adjustable desk"], "price": 499.0, "currency": "USD", "category": "furniture"},
+  {"sku": "IT-MON-27-4K", "name": "27in 4K Monitor", "aliases": ["27 inch monitor", "4k monitor", "27\" monitor"], "price": 379.0, "currency": "USD", "category": "hardware"},
+  {"sku": "IT-DOCK-USBC", "name": "USB-C Laptop Dock", "aliases": ["laptop dock", "usb-c dock", "docking station"], "price": 159.0, "currency": "USD", "category": "hardware"},
+  {"sku": "IT-KB-WIRELESS", "name": "Wireless Keyboard", "aliases": ["wireless keyboard", "bluetooth keyboard"], "price": 59.0, "currency": "USD", "category": "hardware"},
+  {"sku": "IT-MOUSE-WIRELESS", "name": "Wireless Mouse", "aliases": ["wireless mouse", "bluetooth mouse"], "price": 39.0, "currency": "USD", "category": "hardware"},
+  {"sku": "IT-CAM-HD", "name": "HD Webcam", "aliases": ["webcam", "hd webcam", "video camera"], "price": 79.0, "currency": "USD", "category": "hardware"},
+  {"sku": "AV-HEADSET-ANC", "name": "Noise Cancelling Headset", "aliases": ["headset", "noise cancelling headphones", "anc headphones"], "price": 199.0, "currency": "USD", "category": "audio"},
+  {"sku": "AV-SPEAKERPHONE", "name": "Conference Room Speakerphone", "aliases": ["speakerphone", "conference phone", "conference speaker"], "price": 349.0, "currency": "USD", "category": "audio"},
+  {"sku": "OFC-WHITEBOARD-6FT", "name": "6ft Whiteboard", "aliases": ["whiteboard", "6 foot whiteboard", "6ft whiteboard"], "price": 219.0, "currency": "USD", "category": "furniture"}
+]

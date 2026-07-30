@@ -92,11 +92,17 @@
 <body>
 <header>
   <h1>Quoting App -- Agent Dashboard</h1>
-  <div class="token-box">
+  <div id="portalBar" class="token-box" style="display:none">
+    <select id="appSwitcher" class="btn btn-ghost" style="display:none" onchange="onAppSwitcherChange()"></select>
+    <span id="portalIdentity" class="muted"></span>
+    <button id="portalSignoutBtn" class="btn btn-ghost" style="display:none" onclick="portalSignOut()">Sign out</button>
+  </div>
+  <div id="localTokenBar" class="token-box">
     <input id="adminToken" type="text" placeholder="X-Admin-Token">
     <button class="btn btn-ghost" onclick="saveToken()">Save</button>
   </div>
 </header>
+<script>window.__PORTAL_SIGNOUT_URL__ = "%%PORTAL_SIGNOUT_URL%%";</script>
 <nav>
   <button class="active" data-view="overview" onclick="showView('overview')">Overview</button>
   <button data-view="threads" onclick="showView('threads')">Threads</button>

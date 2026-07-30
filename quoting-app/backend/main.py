@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -22,6 +22,18 @@ from integrations import gmail_client
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "dev-admin-token")
 SWEEP_INTERVAL_MINUTES = int(os.environ.get("REMINDER_SWEEP_INTERVAL_MINUTES", "15"))
 GMAIL_POLL_INTERVAL_MINUTES = int(os.environ.get("GMAIL_POLL_INTERVAL_MINUTES", "2"))
+
+# --- seb-portal SSO integration -------------------------------------------
+# Mirrors the pattern documented on stock-picker / Pick-shovels: accept a
+# JWT minted by seb-portal (iss="seb-portal") alongside the local admin
+# token, resolve identity as "portal:<sub>", and gate admin access on the
+# token's `role` claim or an explicit allowlist. NOT verified against the
+# real seb-portal source (no repo access at the time this was written) --
+# double check the claim names below once that's available; this is the
+# consumer-side contract stock-picker/Pick-shovels' CLAUDE.md describe.
+PORTAL_JWT_SECRET = os.environ.get("PORTAL_JWT_SECRET")
+PORTAL_ADMIN_USERS = {u.strip() for u in os.environ.get("QUOTING_APP_ADMIN_USERS", "").split(",") if u.strip()}
+PORTAL_SIGNOUT_URL = os.environ.get("PORTAL_SIGNOUT_URL", "")
 
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 
@@ -46,15 +58,50 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Quoting App", lifespan=lifespan)
 
 
-def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
-    if x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Missing or invalid X-Admin-Token header")
+def _verify_portal_jwt(token: str) -> str | None:
+    """Returns a resolved "portal:<sub>" identity if `token` is a valid
+    seb-portal JWT AND grants admin access to this app (role=="admin" claim,
+    or the raw `sub`/resolved identity is in QUOTING_APP_ADMIN_USERS).
+    Returns None on any failure -- never raises, so callers can treat it as
+    just another form of "not authenticated"."""
+    if not PORTAL_JWT_SECRET:
+        return None
+    import jwt as pyjwt
+    try:
+        payload = pyjwt.decode(token, PORTAL_JWT_SECRET, algorithms=["HS256"])
+    except pyjwt.PyJWTError:
+        return None
+    if payload.get("iss") != "seb-portal":
+        return None
+    sub = payload.get("sub")
+    if not sub:
+        return None
+    identity = f"portal:{sub}"
+    is_admin = payload.get("role") == "admin" or sub in PORTAL_ADMIN_USERS or identity in PORTAL_ADMIN_USERS
+    return identity if is_admin else None
+
+
+def require_admin(x_admin_token: str | None = Header(default=None),
+                   authorization: str | None = Header(default=None)) -> str:
+    if x_admin_token == ADMIN_TOKEN:
+        return "local:admin"
+    if authorization and authorization.lower().startswith("bearer "):
+        identity = _verify_portal_jwt(authorization.split(" ", 1)[1])
+        if identity:
+            return identity
+    raise HTTPException(status_code=401,
+                         detail="Missing or invalid credentials (X-Admin-Token or a seb-portal admin JWT)")
 
 
 # ------------------------------------------------------------------- health --
 @app.get("/api/health")
 def health():
     return {"status": "ok", "time": db.now_iso()}
+
+
+@app.get("/v1/whoami")
+def whoami(identity: str = Depends(require_admin)):
+    return {"identity": identity, "source": "portal" if identity.startswith("portal:") else "local"}
 
 
 # ------------------------------------------------------------ inbound email --
@@ -209,9 +256,15 @@ def recent_decisions(limit: int = 50):
 
 
 # ------------------------------------------------------------- dashboard --
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def dashboard_index():
-    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+    with open(os.path.join(FRONTEND_DIR, "index.html")) as f:
+        html = f.read()
+    # Runtime-injected so PORTAL_SIGNOUT_URL can change without a rebuild --
+    # same per-request injection pattern stock-picker/SOAR use (Pick-shovels
+    # injects once at container boot instead; see its CLAUDE.md for why).
+    html = html.replace("%%PORTAL_SIGNOUT_URL%%", PORTAL_SIGNOUT_URL)
+    return HTMLResponse(content=html)
 
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")

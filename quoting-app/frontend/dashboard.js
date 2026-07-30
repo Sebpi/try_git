@@ -1,6 +1,7 @@
 // Vanilla JS admin dashboard -- no build step, matches the rest of this repo's philosophy.
 let currentThreadId = null;
 let pollTimer = null;
+let portalIdentity = null; // set by renderPortalBar() once /v1/whoami resolves
 
 function getToken() {
   return localStorage.getItem('quoting_admin_token') || '';
@@ -12,21 +13,86 @@ function saveToken() {
   refreshCurrentView();
 }
 
-function toast(msg, isError) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.borderColor = isError ? 'var(--red)' : 'var(--border)';
-  el.style.display = 'block';
-  clearTimeout(el._t);
-  el._t = setTimeout(() => { el.style.display = 'none'; }, 3500);
+// ------------------------------------------------------- seb-portal SSO --
+// Captures the #portal_token=<jwt>&portal_nav=<base64url> handoff seb-portal
+// redirects back with (same convention as stock-picker/Pick-shovels -- see
+// their CLAUDE.md "Portal SSO handoff" notes). Not verified against the
+// real seb-portal source; the portal_nav shape below is a best-effort guess
+// (an array of {name, url} entries) and degrades to "just hide the app
+// switcher" if it doesn't parse.
+function ingestPortalHandoff() {
+  if (location.hash && location.hash.includes('portal_token=')) {
+    const params = new URLSearchParams(location.hash.slice(1));
+    const token = params.get('portal_token');
+    const nav = params.get('portal_nav');
+    if (token) localStorage.setItem('quoting_portal_token', token);
+    if (nav) localStorage.setItem('quoting_portal_nav', nav);
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+
+function getPortalToken() {
+  return localStorage.getItem('quoting_portal_token') || '';
+}
+
+function portalSignOut() {
+  localStorage.removeItem('quoting_portal_token');
+  localStorage.removeItem('quoting_portal_nav');
+  const url = window.__PORTAL_SIGNOUT_URL__;
+  if (url) location.href = url;
+  else location.reload();
+}
+
+function onAppSwitcherChange() {
+  const url = document.getElementById('appSwitcher').value;
+  if (url) location.href = url;
+}
+
+async function renderPortalBar() {
+  const token = getPortalToken();
+  const bar = document.getElementById('portalBar');
+  const localBar = document.getElementById('localTokenBar');
+  if (!token) {
+    bar.style.display = 'none';
+    localBar.style.display = 'flex';
+    return;
+  }
+  localBar.style.display = 'none';
+  bar.style.display = 'flex';
+  document.getElementById('portalSignoutBtn').style.display = 'inline-block';
+
+  try {
+    const who = await apiGet('/v1/whoami');
+    portalIdentity = who.identity;
+    document.getElementById('portalIdentity').textContent = who.identity;
+  } catch (e) {
+    document.getElementById('portalIdentity').textContent = '';
+  }
+
+  const navRaw = localStorage.getItem('quoting_portal_nav');
+  if (navRaw) {
+    try {
+      const apps = JSON.parse(atob(navRaw.replace(/-/g, '+').replace(/_/g, '/')));
+      if (Array.isArray(apps) && apps.length) {
+        const select = document.getElementById('appSwitcher');
+        select.innerHTML = '<option value="">Switch app…</option>' +
+          apps.map((a) => `<option value="${escapeAttr(a.url || a.href || '')}">${escapeHtml(a.name || a.label || 'app')}</option>`).join('');
+        select.style.display = 'inline-block';
+      }
+    } catch (e) { /* unknown portal_nav shape -- just skip the app switcher */ }
+  }
 }
 
 async function api(path, opts = {}) {
+  const portalToken = getPortalToken();
+  const authHeaders = portalToken
+    ? { Authorization: `Bearer ${portalToken}` }
+    : { 'X-Admin-Token': getToken() };
   const res = await fetch(path, {
     ...opts,
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': getToken(),
+      ...authHeaders,
       ...(opts.headers || {}),
     },
   });
@@ -41,6 +107,8 @@ const apiGet = (path) => api(path);
 const apiPost = (path, data) => api(path, { method: 'POST', body: JSON.stringify(data) });
 
 window.addEventListener('DOMContentLoaded', () => {
+  ingestPortalHandoff();
+  renderPortalBar();
   document.getElementById('adminToken').value = getToken();
   showView('overview');
   setInterval(refreshCurrentView, 20000); // light polling so the dashboard stays live
@@ -253,6 +321,7 @@ async function saveEdit(id, subject) {
 }
 
 function promptApprover() {
+  if (portalIdentity) return portalIdentity; // signed in via seb-portal -- no need to ask
   let name = localStorage.getItem('quoting_am_name');
   if (!name) {
     name = prompt('Your name (account manager)?', 'Account Manager') || 'Account Manager';

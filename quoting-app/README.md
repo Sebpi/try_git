@@ -120,6 +120,55 @@ Cloud Pub/Sub topic and domain verification, which is a lot of setup for a
 mailbox that isn't a Workspace-managed domain -- the same IMAP-idle-vs-poll
 trade-off SPEC.md already calls out for the Ingestion Agent.
 
+## seb-portal integration
+
+This app's side of the shared `seb-portal` SSO gateway (the same one
+stock-picker and Pick-shovels sit behind), implemented against the pattern
+those two repos' `CLAUDE.md` files describe:
+
+> **This was written without access to the seb-portal repo itself** (session
+> access to `Sebpi/seb-portal` couldn't be granted at the time) -- the claim
+> names, `portal_nav` payload shape, and sign-out flow below are a best-effort
+> match to stock-picker/Pick-shovels' documented contract, not verified
+> against the real portal source. Treat this as a starting point to diff
+> against the actual portal code once you have access, not a guarantee it's
+> byte-for-byte compatible. **The portal-side registration (adding this app
+> to seb-portal's app list/AppSwitcher, deploying it somewhere seb-portal can
+> reach) is not done** -- that half needs the seb-portal repo.
+
+**Backend** (`main.py`):
+- Set `PORTAL_JWT_SECRET` to accept JWTs minted by seb-portal. `require_admin`
+  now accepts either the existing `X-Admin-Token` header OR an
+  `Authorization: Bearer <jwt>` where the JWT has `iss: "seb-portal"`,
+  verifies with `PORTAL_JWT_SECRET` (HS256), and resolves identity as
+  `"portal:<sub>"` -- mirroring stock-picker's `get_current_user` contract.
+- Admin access via a portal token requires either the JWT's `role` claim to
+  equal `"admin"`, or the `sub` to be listed in `QUOTING_APP_ADMIN_USERS`
+  (comma-separated), mirroring Pick-shovels' `PICK_SHOVELS_ADMIN_USERS`
+  override pattern.
+- `GET /v1/whoami` returns the resolved identity + whether it came from
+  `local` or `portal` -- the dashboard uses this to prefill the approver name
+  instead of prompting when signed in via the portal.
+- `PORTAL_SIGNOUT_URL` is injected into `index.html` at request time (same
+  per-request injection stock-picker/SOAR use for their portal sign-out pill;
+  see Pick-shovels' `CLAUDE.md` for why it instead injects once at container
+  boot -- a choice worth revisiting here if it turns out to matter for
+  caching).
+
+**Frontend** (`dashboard.js`): `ingestPortalHandoff()` captures
+`#portal_token=<jwt>&portal_nav=<base64url>` from the URL hash (the same
+convention Pick-shovels' `ingestPortalHandoff()` in `App.jsx` uses) into
+`localStorage`, scrubs the hash, and switches `api()` to send
+`Authorization: Bearer <token>` instead of `X-Admin-Token` whenever a portal
+token is present. A sign-out pill and a best-effort app-switcher dropdown
+(parsed from `portal_nav`, assumed to be an array of `{name, url}` -- adjust
+`renderPortalBar()` once you can confirm the real shape) render in the
+header when a portal session is active.
+
+Everything above degrades to today's local-token flow when
+`PORTAL_JWT_SECRET` is unset, so none of this is required to keep using the
+app standalone.
+
 ## What's stubbed for a real deployment
 
 - `integrations/crm_mock.py` / `integrations/product_catalog.py` -- swap for

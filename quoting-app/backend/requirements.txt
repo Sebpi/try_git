@@ -1,0 +1,14 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.0
+pydantic==2.13.4
+apscheduler==3.11.3
+anthropic==0.120.2
+PyJWT==2.13.0
+pytest==9.1.1
+httpx==0.28.1
+
+# Gmail integration (optional -- email_client/gmail_poll degrade gracefully
+# without these installed, as long as GMAIL_* env vars are also unset)
+google-api-python-client==2.156.0
+google-auth==2.37.0
+google-auth-oauthlib==1.2.1

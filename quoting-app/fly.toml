@@ -1,0 +1,32 @@
+# TODO before first deploy: `flyctl apps create <chosen-name>` (or let
+# `flyctl launch` generate one), then update `app` below to match, and set
+# secrets: ADMIN_TOKEN, ANTHROPIC_API_KEY (optional), PORTAL_JWT_SECRET
+# (same value as seb-portal/stock-picker/Pick-shovels), GMAIL_* (optional),
+# SMTP_* (optional). See backend/.env style vars documented in README.md.
+app = "seb-quoting-app"
+primary_region = "ams"
+
+[build]
+
+[env]
+  DATA_DIR = "/app/data"
+  REMINDER_SWEEP_INTERVAL_MINUTES = "15"
+  GMAIL_POLL_INTERVAL_MINUTES = "5"
+
+[[mounts]]
+  source = "quoting_app_data"
+  destination = "/app/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  path = "/api/health"
+  timeout = "5s"

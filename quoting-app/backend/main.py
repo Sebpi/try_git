@@ -15,10 +15,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 import db
+import gmail_poll
 import orchestrator
+from integrations import gmail_client
 
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "dev-admin-token")
 SWEEP_INTERVAL_MINUTES = int(os.environ.get("REMINDER_SWEEP_INTERVAL_MINUTES", "15"))
+GMAIL_POLL_INTERVAL_MINUTES = int(os.environ.get("GMAIL_POLL_INTERVAL_MINUTES", "2"))
 
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 
@@ -32,6 +35,9 @@ async def lifespan(app: FastAPI):
     _scheduler = BackgroundScheduler()
     _scheduler.add_job(orchestrator.run_reminder_sweep, "interval",
                         minutes=SWEEP_INTERVAL_MINUTES, id="reminder_sweep")
+    if gmail_client.available():
+        _scheduler.add_job(gmail_poll.poll_and_ingest, "interval",
+                            minutes=GMAIL_POLL_INTERVAL_MINUTES, id="gmail_poll")
     _scheduler.start()
     yield
     _scheduler.shutdown(wait=False)
@@ -99,6 +105,17 @@ def fast_forward(thread_id: str, payload: FastForward):
     if reminder:
         db.upsert_reminder(thread_id, stage=reminder["stage"], next_fire_at=past.isoformat())
     return {"ok": True, "backdated_to": past.isoformat()}
+
+
+# -------------------------------------------------------------------- gmail --
+@app.get("/v1/gmail/status", dependencies=[Depends(require_admin)])
+def gmail_status():
+    return {"configured": gmail_client.available(), "poll_interval_minutes": GMAIL_POLL_INTERVAL_MINUTES}
+
+
+@app.post("/v1/gmail/poll-now", dependencies=[Depends(require_admin)])
+def gmail_poll_now():
+    return gmail_poll.poll_and_ingest()
 
 
 # ---------------------------------------------------------------- threads --

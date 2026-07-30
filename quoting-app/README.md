@@ -75,17 +75,56 @@ and the full two-stage reminder cadence to close-no-response).
 - **`/dev/fast-forward/{thread_id}`** (admin-only) backdates a thread's clock
   for demoing/testing the reminder cadence without waiting days.
 
+## Gmail setup (real send + inbound)
+
+The email client now talks to Gmail for real when configured, and falls back
+to SMTP (if `SMTP_HOST` is set) or a console log otherwise -- nothing else
+changes, so the app runs fine with none of this configured.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/): create/select
+   a project, then **APIs & Services -> Library** -> enable the **Gmail API**.
+2. **APIs & Services -> Credentials -> Create Credentials -> OAuth client ID**,
+   application type **Desktop app**. Download the client secret JSON.
+3. `pip install -r requirements.txt` (already includes the Gmail API client
+   libs), then run:
+   ```bash
+   python scripts/gmail_get_refresh_token.py path/to/client_secret.json
+   ```
+   This opens a browser for one-time consent against the Gmail account you
+   want the app to send/receive as, and prints a refresh token.
+4. Set the env vars it prints:
+   ```
+   GMAIL_CLIENT_ID=...
+   GMAIL_CLIENT_SECRET=...
+   GMAIL_REFRESH_TOKEN=...
+   # optional -- only if it's a verified "Send As" alias on that account:
+   GMAIL_SENDER_EMAIL=quotes@yourdomain.com
+   ```
+5. Restart the server. It will now:
+   - **Send** every approved draft as a real Gmail message
+     (`integrations/gmail_client.py`).
+   - **Poll** the inbox every `GMAIL_POLL_INTERVAL_MINUTES` (default 2) for
+     new messages, feed each one into `orchestrator.process_inbound_email`,
+     and label it `QuotingAppProcessed` so it's never re-ingested
+     (`gmail_poll.py`, wired into the APScheduler job in `main.py`).
+   - Match replies to their thread using Gmail's own `threadId` first (most
+     reliable), falling back to the `[Ref: ...]` subject token or sender
+     address the same way the mocked path already did.
+
+   The dashboard's **Simulate** tab shows whether Gmail is connected and has
+   a "Poll Gmail now" button to trigger a fetch on demand instead of waiting
+   for the schedule.
+
+Polling rather than push notifications is deliberate: Gmail push requires a
+Cloud Pub/Sub topic and domain verification, which is a lot of setup for a
+mailbox that isn't a Workspace-managed domain -- the same IMAP-idle-vs-poll
+trade-off SPEC.md already calls out for the Ingestion Agent.
+
 ## What's stubbed for a real deployment
 
 - `integrations/crm_mock.py` / `integrations/product_catalog.py` -- swap for
   real CRM (Salesforce/HubSpot/Dynamics) and catalog/ERP API clients behind
   the same function signatures.
-- `integrations/email_client.py` -- logs to console by default; set
-  `SMTP_HOST` (+ `SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM`) for real
-  outbound mail. Inbound is via `POST /webhooks/inbound-email` -- point a
-  provider webhook (Gmail push, Microsoft Graph, Postmark/SendGrid inbound
-  parse) at it and replace the admin-token check with real provider signature
-  verification.
 - The Approval Agent currently surfaces drafts only in this dashboard; SPEC.md
   §6 agent #7 also anticipates an email-link or Slack/Teams action-button
   channel for AMs who don't live in the dashboard.

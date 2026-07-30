@@ -1,8 +1,9 @@
 """Outbound email sending.
 
-Defaults to a console/log backend so the whole pipeline is demoable without
-any mail credentials. Set SMTP_HOST (+ SMTP_PORT/SMTP_USER/SMTP_PASSWORD/
-SMTP_FROM) to send real mail via smtplib instead.
+Backend priority: Gmail API (if GMAIL_* env vars are set) -> SMTP (if
+SMTP_HOST is set) -> console/log. The console backend keeps the whole
+pipeline demoable without any mail credentials at all; Gmail is the intended
+production path (see integrations/gmail_client.py for setup).
 """
 from __future__ import annotations
 
@@ -11,10 +12,16 @@ import os
 import smtplib
 from email.message import EmailMessage
 
+from integrations import gmail_client
+
 logger = logging.getLogger("quoting_app.email")
 
 
 def send(*, to_email: str, subject: str, body: str) -> None:
+    if gmail_client.available():
+        gmail_client.send(to_email=to_email, subject=subject, body=body)
+        return
+
     host = os.environ.get("SMTP_HOST")
     if not host:
         logger.info("=== OUTBOUND EMAIL (console backend) ===\nTo: %s\nSubject: %s\n\n%s\n===",

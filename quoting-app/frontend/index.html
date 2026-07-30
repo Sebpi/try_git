@@ -137,6 +137,14 @@
 
   <section id="view-simulate" class="view">
     <div class="card">
+      <h3>Gmail live inbox</h3>
+      <div id="gmailStatus" class="muted">Loading...</div>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn btn-ghost" onclick="pollGmailNow()">Poll Gmail now</button>
+      </div>
+      <div id="gmailResult" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
       <h3>Simulate an inbound email</h3>
       <p class="muted">Injects a message straight into the Ingestion Agent, exactly like a real inbox webhook would.</p>
       <div class="example-btns">

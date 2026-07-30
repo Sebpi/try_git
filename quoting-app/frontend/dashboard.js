@@ -59,6 +59,7 @@ function refreshCurrentView(name) {
   if (active === 'overview') loadOverview();
   else if (active === 'threads') loadThreads();
   else if (active === 'approvals') loadApprovals();
+  else if (active === 'simulate') loadGmailStatus();
   else if (active === 'thread-detail' && currentThreadId) loadThreadDetail(currentThreadId);
 }
 
@@ -318,6 +319,25 @@ async function rejectFromList(id) {
   if (reason === null) return;
   try { await apiPost(`/v1/drafts/${id}/reject`, { approver: promptApprover(), reason }); toast('Rejected.'); loadApprovals(); }
   catch (e) { toast(e.message, true); }
+}
+
+// -------------------------------------------------------------------- gmail --
+async function loadGmailStatus() {
+  try {
+    const status = await apiGet('/v1/gmail/status');
+    document.getElementById('gmailStatus').innerHTML = status.configured
+      ? `<span class="pill green">connected</span> polling every ${status.poll_interval_minutes} min`
+      : `<span class="pill amber">not configured</span> set GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET / GMAIL_REFRESH_TOKEN (see README) to enable`;
+  } catch (e) { toast(e.message, true); }
+}
+
+async function pollGmailNow() {
+  try {
+    const res = await apiPost('/v1/gmail/poll-now', {});
+    document.getElementById('gmailResult').innerHTML = res.configured
+      ? `<span class="pill blue">processed ${res.processed} message(s)</span>`
+      : `<span class="pill amber">Gmail not configured</span>`;
+  } catch (e) { toast(e.message, true); }
 }
 
 // ---------------------------------------------------------------- simulate --

@@ -214,9 +214,11 @@ def update_thread(thread_id: str, **fields: Any) -> dict:
     if not fields:
         return get_thread(thread_id)
     fields["updated_at"] = now_iso()
+    # nosec B608 -- column names come only from hardcoded kwargs at call sites
+    # (see agents/sender.py, orchestrator.py etc.), never from request bodies.
     cols = ", ".join(f"{k}=?" for k in fields)
     conn = get_conn()
-    conn.execute(f"UPDATE quote_threads SET {cols} WHERE id=?", (*fields.values(), thread_id))
+    conn.execute(f"UPDATE quote_threads SET {cols} WHERE id=?", (*fields.values(), thread_id))  # nosec B608
     conn.commit()
     return get_thread(thread_id)
 
@@ -289,8 +291,10 @@ def list_pending_drafts() -> list[dict]:
 
 def update_draft(draft_id: int, **fields: Any) -> dict:
     conn = get_conn()
+    # nosec B608 -- column names come only from hardcoded kwargs at call sites
+    # (see agents/approval.py), never from request bodies.
     cols = ", ".join(f"{k}=?" for k in fields)
-    conn.execute(f"UPDATE quote_drafts SET {cols} WHERE id=?", (*fields.values(), draft_id))
+    conn.execute(f"UPDATE quote_drafts SET {cols} WHERE id=?", (*fields.values(), draft_id))  # nosec B608
     conn.commit()
     return get_draft(draft_id)
 
